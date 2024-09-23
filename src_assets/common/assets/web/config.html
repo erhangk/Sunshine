@@ -51,6 +51,183 @@
         :platform="platform"
       >
       </audio-video>
+      <div id="audio-video" v-if="currentTab === 'av'" class="config-page">
+        <!-- Audio Sink -->
+        <div class="mb-3" v-if="platform === 'windows'">
+          <label for="audio_sink" class="form-label">Audio Sink</label>
+          <input type="text" class="form-control" id="audio_sink" placeholder="Speakers (High Definition Audio Device)"
+            v-model="config.audio_sink" />
+          <div class="form-text">
+            Manually specify a specific audio device to capture. If unset, the device is chosen automatically.<br>
+            <b>We strongly recommend leaving this field blank to use automatic device selection!</b><br>
+            If you have multiple audio devices with identical names, you can get the Device ID using the following
+            command:<br>
+            <pre>tools\audio-info.exe</pre>
+          </div>
+        </div>
+        <div class="mb-3" v-if="platform === 'linux'">
+          <label for="audio_sink" class="form-label">Audio Sink</label>
+          <input type="text" class="form-control" id="audio_sink"
+            placeholder="alsa_output.pci-0000_09_00.3.analog-stereo" v-model="config.audio_sink" />
+          <div class="form-text">
+            The name of the audio sink used for Audio Loopback<br>
+            If you do not specify this variable, pulseaudio will select the default monitor device.<br>
+            <br>
+            You can find the name of the audio sink using either command:<br>
+            <pre>pacmd list-sinks | grep "name:"</pre>
+            <pre>pactl info | grep Source</pre>
+            <br>
+          </div>
+        </div>
+        <div class="mb-3" v-if="platform === 'macos'">
+          <label for="audio_sink" class="form-label">Audio Sink</label>
+          <input type="text" class="form-control" id="audio_sink" placeholder="BlackHole 2ch"
+            v-model="config.audio_sink" />
+          <div class="form-text">
+            The name of the audio sink used for Audio Loopback<br>
+            Sunshine can only access microphones on macOS due to system limitations.<br>
+            To stream system audio using
+            <a href="https://github.com/mattingalls/Soundflower" target="_blank">Soundflower</a> or
+            <a href="https://github.com/ExistentialAudio/BlackHole" target="_blank">BlackHole</a>.
+          </div>
+        </div>
+
+        <!-- Virtual Sink -->
+        <div class="mb-3" v-if="platform === 'windows'">
+          <label for="virtual_sink" class="form-label">Virtual Sink</label>
+          <input type="text" class="form-control" id="virtual_sink" placeholder="Steam Streaming Speakers"
+            v-model="config.virtual_sink" />
+          <div class="form-text">
+            Manually specify a virtual audio device to use. If unset, the device is chosen automatically.<br>
+            <b>We strongly recommend leaving this field blank to use automatic device selection!</b><br>
+          </div>
+        </div>
+
+        <!-- Install Steam Audio Drivers -->
+        <div class="mb-3" v-if="platform === 'windows'">
+          <label for="install_steam_audio_drivers" class="form-label">Install Steam Audio Drivers</label>
+          <select id="install_steam_audio_drivers" class="form-select" v-model="config.install_steam_audio_drivers">
+            <option value="disabled">Disabled</option>
+            <option value="enabled">Enabled</option>
+          </select>
+          <div class="form-text">
+            If Steam is installed, this will automatically install the Steam Streaming Speakers driver to support
+            5.1/7.1 surround sound and muting host audio.
+          </div>
+        </div>
+
+        <!-- Adapter Name -->
+        <div class="mb-3" v-if="platform === 'windows'">
+          <label for="adapter_name" class="form-label">Adapter Name</label>
+          <input type="text" class="form-control" id="adapter_name" placeholder="Radeon RX 580 Series"
+            v-model="config.adapter_name" />
+          <div class="form-text">
+            Manually specify a GPU to use for capture. If unset, the GPU is chosen automatically.<br>
+            <b>We strongly recommend leaving this field blank to use automatic GPU selection!</b><br>
+            Note: This GPU must have a display connected and powered on.<br>
+            The appropriate values can be found using the following command:<br>
+            <pre>tools\dxgi-info.exe</pre>
+          </div>
+        </div>
+        <div class="mb-3" v-if="platform === 'linux'">
+          <label for="adapter_name" class="form-label">Adapter Name</label>
+          <input class="form-control" id="adapter_name" placeholder="/dev/dri/renderD128" v-model="config.adapter_name" />
+          <div class="form-text">
+            Manually specify a GPU to use for encoding. This MUST be a render node (renderD*) not a primary node (card*).<br>
+            <pre>ls /dev/dri/renderD*  # to find all devices capable of VAAPI</pre>
+            <pre>
+              vainfo --display drm --device /dev/dri/renderD129 | \
+                grep -E "((VAProfileH264High|VAProfileHEVCMain|VAProfileHEVCMain10).*VAEntrypointEncSlice)|Driver version"
+            </pre>
+            Replace ``renderD129`` with the device from above to lists the name and capabilities of the device.<br>
+            To be supported by Sunshine, it needs to have at the very minimum:
+            <i>VAProfileH264High   : VAEntrypointEncSlice</i>
+          </div>
+        </div>
+
+        <!-- Output Name -->
+        <div class="mb-3" v-if="platform === 'windows'">
+          <label for="output_name" class="form-label">Output Name</label>
+          <input type="text" class="form-control" id="output_name" placeholder="\\.\DISPLAY1"
+            v-model="config.output_name" />
+          <div class="form-text">
+            Manually specify a display to use for capture. If unset, the primary display is captured.<br>
+            Note: If you specified a GPU above, this display must be connected to that GPU.<br>
+            The appropriate values can be found using the following command:<br>
+            tools\dxgi-info.exe<br>
+          </div>
+        </div>
+        <div class="mb-3" v-if="platform === 'linux'">
+          <label for="output_name" class="form-label">Monitor number</label>
+          <input type="text" class="form-control" id="output_name" placeholder="0" v-model="config.output_name" />
+          <div class="form-text">
+            During Sunshine startup, you should see the list of detected monitors, e.g.:<br>
+            <br>
+            <pre style="white-space: pre-line;">
+            Info: Detecting connected monitors
+            Info: Detected monitor 0: DVI-D-0, connected: false
+            Info: Detected monitor 1: HDMI-0, connected: true
+            Info: Detected monitor 2: DP-0, connected: true
+            Info: Detected monitor 3: DP-1, connected: false
+            Info: Detected monitor 4: DVI-D-1, connected: false
+          </pre>
+            You need to use the value before the colon in the output, e.g. <b>1</b>.
+          </div>
+        </div>
+
+        <!-- Display Modes -->
+        <div class="mb-3">
+          <!-- Advertised Resolutions -->
+          <div id="resolutions" class="resolutions-container">
+            <label>Advertised Resolutions</label>
+            <div class="resolutions d-flex flex-wrap">
+              <div class="p-2 ms-item m-2 d-flex justify-content-between" v-for="(r,i) in resolutions" :key="r">
+                <span class="px-2">{{r}}</span>
+                <span style="cursor: pointer" @click="resolutions.splice(i,1)">&times;</span>
+              </div>
+            </div>
+            <form @submit.prevent="resolutions.push(resIn);resIn = '';" class="d-flex align-items-center">
+              <input type="text" v-model="resIn" required pattern="[0-9]+x[0-9]+" style="
+                  width: 12ch;
+                  border-top-right-radius: 0;
+                  border-bottom-right-radius: 0;
+                " class="form-control" />
+              <button style="border-top-left-radius: 0; border-bottom-left-radius: 0" class="btn btn-success">
+                +
+              </button>
+            </form>
+          </div>
+
+          <!-- Advertised FPS -->
+          <div id="fps" class="fps-container">
+            <label>Advertised FPS</label>
+            <div class="fps d-flex flex-wrap">
+              <div class="p-2 ms-item m-2 d-flex justify-content-between" v-for="(f,i) in fps" :key="f">
+                <span class="px-2">{{f}}</span>
+                <span style="cursor: pointer" @click="fps.splice(i,1)">&times;</span>
+              </div>
+            </div>
+            <form @submit.prevent="fps.push(fpsIn);fpsIn = '';" class="d-flex align-items-center">
+              <input type="text" v-model="fpsIn" required pattern="[0-9]+" style="
+                  width: 6ch;
+                  border-top-right-radius: 0;
+                  border-bottom-right-radius: 0;
+                " class="form-control" />
+              <button style="border-top-left-radius: 0; border-bottom-left-radius: 0" class="btn btn-success">
+                +
+              </button>
+            </form>
+          </div>
+
+          <div class="form-text">
+            The display modes advertised by Sunshine.<br>
+            Some versions of Moonlight, such as Moonlight-nx (Switch), rely on these lists to ensure that the requested
+            resolutions and fps are supported.<br>
+            This setting does <b>not</b> change how the screen stream is sent to Moonlight.
+          </div>
+        </div>
+
+      </div>
 
       <!-- Network Tab -->
       <network
