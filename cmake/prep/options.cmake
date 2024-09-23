@@ -7,7 +7,7 @@ set(SUNSHINE_PUBLISHER_ISSUE_URL "https://app.lizardbyte.dev/support"
         CACHE STRING "The URL of the publisher's support site or issue tracker.
         If you provide a modified version of Sunshine, we kindly request that you use your own url.")
 
-option(BUILD_DOCS "Build documentation" ON)
+option(BUILD_DOCS "Build documentation" OFF)
 option(BUILD_TESTS "Build tests" ON)
 option(TESTS_ENABLE_PYTHON_TESTS "Enable Python tests" ON)
 
@@ -61,13 +61,13 @@ elseif(UNIX)  # Linux
     option(SUNSHINE_ENABLE_CUDA
             "Enable cuda specific code." ON)
     option(SUNSHINE_ENABLE_DRM
-            "Enable KMS grab if available." ON)
+            "Enable KMS grab if available." OFF)
     option(SUNSHINE_ENABLE_VAAPI
             "Enable building vaapi specific code." ON)
     option(SUNSHINE_ENABLE_WAYLAND
             "Enable building wayland specific code." ON)
     option(SUNSHINE_ENABLE_X11
-            "Enable X11 grab if available." ON)
+            "Enable X11 grab if available." OFF)
     option(SUNSHINE_USE_LEGACY_INPUT  # TODO: Remove this legacy option after the next stable release
             "Use the legacy virtual input implementation." OFF)
     option(SUNSHINE_ENABLE_PORTAL
