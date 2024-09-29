@@ -59,9 +59,9 @@ elseif(UNIX)  # Linux
 
     # Linux capture methods
     option(SUNSHINE_ENABLE_CUDA
-            "Enable cuda specific code." ON)
+            "Enable cuda specific code." OFF)
     option(SUNSHINE_ENABLE_DRM
-            "Enable KMS grab if available." OFF)
+            "Enable KMS grab if available." ON)
     option(SUNSHINE_ENABLE_VAAPI
             "Enable building vaapi specific code." ON)
     option(SUNSHINE_ENABLE_WAYLAND

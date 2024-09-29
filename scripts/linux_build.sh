@@ -278,11 +278,8 @@ function run_install() {
     "-DSUNSHINE_ENABLE_WAYLAND=ON"
     "-DSUNSHINE_ENABLE_X11=ON"
     "-DSUNSHINE_ENABLE_DRM=ON"
-    "-DCMAKE_CXX_FLAGS=-Wno-error"
-    "-DCMAKE_C_FLAGS_RELEASE=-O3 -Wall"
-    "-DCMAKE_CXX_FLAGS_RELEASE=-O3 -Wall"
-    "-DBUILD_DOCS=OFF"
     "-DSUNSHINE_ENABLE_PORTAL=ON"   # Enable XDG portal	
+    "-DBUILD_DOCS=OFF"
   )
 
   if [ "$appimage_build" == 1 ]; then

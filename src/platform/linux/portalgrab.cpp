@@ -107,6 +107,9 @@ namespace portal {
       g_autofree gchar *session_path = NULL, *session_token = NULL;
       create_session_path (conn, &session_path, &session_token);
 
+      BOOST_LOG(info) << "Session path: " << session_path;
+      BOOST_LOG(info) << "Session token: " << session_token;
+
       if (create_session(loop, session_path, session_token) < 0)
         return -1;
       if (select_remote_desktop_devices(loop, session_path) < 0)
