@@ -281,6 +281,7 @@ function run_install() {
     "-DSUNSHINE_ENABLE_WAYLAND=ON"
     "-DSUNSHINE_ENABLE_X11=ON"
     "-DSUNSHINE_ENABLE_DRM=ON"
+    "-DSUNSHINE_ENABLE_CUDA=OFF"
   )
 
   if [ "$appimage_build" == 1 ]; then
@@ -307,7 +308,7 @@ function run_install() {
     add_ubuntu_deps
   elif [ "$distro" == "fedora" ]; then
     add_fedora_deps
-    ${sudo_cmd} dnf group install "Development Tools" -y
+    ${sudo_cmd} dnf group install "development-tools" -y
   fi
 
   # Install the dependencies
@@ -460,6 +461,15 @@ elif grep -q "PLATFORM_ID=\"platform:f40\"" /etc/os-release; then
   cuda_version=
   cuda_build=
   gcc_version="13"
+  nvm_node=0
+elif grep -q "PLATFORM_ID=\"platform:f41\"" /etc/os-release; then
+  distro="fedora"
+  version="41"
+  package_update_command="${sudo_cmd} dnf update -y"
+  package_install_command="${sudo_cmd} dnf install -y"
+  cuda_version=
+  cuda_build=
+  gcc_version="14"
   nvm_node=0
 elif grep -q "Ubuntu 22.04" /etc/os-release; then
   distro="ubuntu"
